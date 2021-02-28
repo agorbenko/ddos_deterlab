@@ -1,0 +1,11 @@
+- name: Client Tasks
+  hosts: Client
+  tasks:
+    - name: install tcpdump
+      become: yes
+      yum:
+        name: tcpdump
+        state: present
+    - name: Watch Real Traffic at Client
+      become: yes
+      shell: sudo chmod 0777 WatchTraffic.sh && ./WatchTraffic.sh

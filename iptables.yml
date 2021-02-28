@@ -1,0 +1,32 @@
+- name: Steps to make NAT at ClientNAT
+  hosts: ClientNAT
+  tasks:
+    - name: get the interface name
+      shell: ip addr | grep -oP 'inet 1.2.2.1/24 brd 1.2.2.255 scope global \K\w+'
+      register: if_name
+    - name: make NAT at ClientNAT
+      become: yes
+      ansible.builtin.iptables:
+        table: nat
+        chain: POSTROUTING
+        out_interface: "{{ if_name.stdout }}"
+        jump: MASQUERADE
+
+#- name: Steps to make Port Changer (giving specific port for now)
+#  hosts: DDDPortChanger
+#  tasks:
+#    - name: get the interface name
+#      shell: ip addr | grep -oP 'inet 1.2.3.1/24 brd 1.2.3.255 scope global \K\w+'
+#      register: if_name
+#
+    # - name: Packet from client to internet
+      # become: yes
+      # ansible.builtin.iptables:
+        # table: nat
+        # chain: PREROUTING
+        # #in_interface: eth0
+        # #protocol: tcp
+        # match: tcp
+        # to_source: 1357 
+        # jump: DNAT
+        # comment: Changing the port of all traffic from client to come from port 1357

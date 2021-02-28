@@ -1,0 +1,12 @@
+[RemoteServer] 
+remoteserver.dddbasicscenario.cloudos
+
+
+[Client]
+client.dddbasicscenario.cloudos
+
+[ClientNAT]
+clientnat.dddbasicscenario.cloudos
+
+[DDDPortChanger]
+dddportchanger.dddbasicscenario.cloudos

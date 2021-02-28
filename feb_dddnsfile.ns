@@ -1,0 +1,99 @@
+# This is a simple ns script. Comments start with #.
+
+set ns [new Simulator]                  
+source tb_compat.tcl
+
+set DDDCloud [$ns node]
+set ClientNAT [$ns node]
+
+set RemoteServer [$ns node]
+set Attacker [$ns node]
+set DDDPortChanger [$ns node]
+set Client [$ns node]
+set Client2 [$ns node]
+
+set DDDFilter [$ns node]
+set DDDController [$ns node]
+set Internet [$ns node]
+
+set CompromisedServer [$ns node]
+
+
+set link0 [$ns duplex-link $Internet $Attacker 30Mb 50ms DropTail]
+set link1 [$ns duplex-link $Internet $RemoteServer 30Mb 50ms DropTail]
+set link2 [$ns duplex-link $DDDFilter $Internet 30Mb 50ms DropTail]
+set link3 [$ns duplex-link $Internet $DDDCloud 30Mb 50ms DropTail]
+set link6 [$ns duplex-link $ClientNAT $DDDPortChanger 30Mb 50ms DropTail]
+set link7 [$ns duplex-link $Internet $CompromisedServer 30Mb 50ms DropTail]
+
+
+
+
+
+tb-set-netmask $link1 255.255.255.0
+tb-set-netmask $link2 255.255.255.0
+tb-set-netmask $link3 255.255.255.0
+tb-set-netmask $link6 255.255.255.0
+tb-set-netmask $link7 255.255.255.0
+
+
+set clientLAN [$ns make-lan "$Client $Client2 $ClientNAT" 50Mb 0ms]
+set ispLAN [$ns make-lan "$DDDController $DDDFilter $DDDPortChanger" 50Mb 0ms]
+
+tb-set-ip-lan $Client $clientLAN 10.1.1.1
+tb-set-ip-lan $Client2 $clientLAN 10.1.1.3
+tb-set-ip-lan $ClientNAT $clientLAN 10.1.1.2
+
+
+tb-set-ip-lan $DDDPortChanger $ispLAN 1.2.3.1
+tb-set-ip-lan $DDDController $ispLAN 1.2.3.2
+tb-set-ip-lan $DDDFilter $ispLAN 1.2.3.3
+
+tb-set-ip-link ClientNAT link6 1.2.2.1
+tb-set-ip-link DDDPortChanger link6 1.2.2.2
+
+tb-set-ip-link DDDFilter link2 1.2.5.1
+tb-set-ip-link Internet link2 1.2.5.2
+
+tb-set-ip-link Internet link0 6.6.6.5
+tb-set-ip-link Attacker link0 6.6.6.6
+
+tb-set-ip-link Internet link1 5.5.5.5
+tb-set-ip-link RemoteServer link1 5.5.5.6
+
+tb-set-ip-link Internet link3 4.4.4.5
+tb-set-ip-link DDDCloud link3 4.4.4.6
+
+tb-set-ip-link Internet link7 7.7.7.5
+tb-set-ip-link CompromisedServer link7 7.7.7.6
+
+set queue0 [[$ns link $ClientNAT $DDDPortChanger] queue]
+	$queue0 set limit_ 10
+	#max 10 packets in the queue
+set queue1 [[$ns link $DDDPortChanger $ClientNAT] queue]
+	$queue1 set limit_ 20
+
+#need to eventually set more queues, but for now, I was just making sure I can
+
+
+tb-set-node-os $DDDCloud CentOS7-STD
+tb-set-node-os $RemoteServer CentOS7-STD
+tb-set-node-os $Attacker CentOS7-STD
+tb-set-node-os $Client CentOS7-STD 
+tb-set-node-os $Client2 CentOS7-STD 
+tb-set-node-os $Internet CentOS7-STD 
+tb-set-node-os $ClientNAT CentOS7-STD
+tb-set-node-os $DDDFilter CentOS7-STD
+tb-set-node-os $DDDPortChanger CentOS7-STD
+tb-set-node-os $DDDController CentOS7-STD
+tb-set-node-os $CompromisedServer CentOS7-STD
+
+
+
+
+
+
+
+$ns rtproto Static
+#Go!
+$ns run    

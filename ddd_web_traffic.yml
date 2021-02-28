@@ -1,0 +1,19 @@
+- name: Remote Server Tasks
+  hosts: RemoteServer
+  tasks:
+    - name: Create Website
+      become: yes
+      shell: sudo chmod 0777 WebCreate.sh && ./WebCreate.sh 
+
+
+
+- name: Client Tasks
+  hosts: Client
+  tasks:
+    - name: Real Traffic
+      become: yes
+      shell: nohup bash WebConnect.sh &
+      
+    - name: Watch Real Traffic at Client
+      become: yes
+      shell: sudo chmod 0777 WatchTraffic.sh && ./WatchTraffic.sh
